@@ -22,8 +22,6 @@
 
 ## § I — Particulars
 
-> *Three notes, set in brief.*
-
 ### *i.* &ensp; Owned in common.
 
 The service is to be held by the cooperatives that use it, on a one member, one vote basis, in keeping with the Rochdale principles.
@@ -39,8 +37,6 @@ Worker, consumer, housing, producer, and platform cooperatives are equally at ho
 ---
 
 ## § II — On the Matter
-
-> *Two questions, answered plainly.*
 
 ### *i.* &ensp; What it is
 
@@ -58,7 +54,7 @@ The shorteners in common use are commercial concerns. They record each click, mo
 
 *To register your interest, write to —*
 
-### **[`jbrock@techsupport.coop`](mailto:jbrock@techsupport.coop?subject=co-op.link%20%E2%80%94%20register%20interest&body=Hello%2C%0A%0AI%27d%20like%20to%20register%20my%20interest%20in%20co-op.link.%0A%0AOrganisation%3A%20%0AForm%20of%20cooperative%20%28worker%2C%20consumer%2C%20housing%2C%20producer%2C%20platform%2C%20mutual%2C%20other%29%3A%20%0AApproximate%20membership%3A%20%0AWebsite%3A%20%0A%0ANotes%3A%20)**
+### **[`info@co-op.link`](mailto:info@co-op.link?subject=co-op.link%20%E2%80%94%20register%20interest&body=Hello%2C%0A%0AI%27d%20like%20to%20register%20my%20interest%20in%20co-op.link.%0A%0AOrganisation%3A%20%0AForm%20of%20cooperative%20%28worker%2C%20consumer%2C%20housing%2C%20producer%2C%20platform%2C%20mutual%2C%20other%29%3A%20%0AApproximate%20membership%3A%20%0AWebsite%3A%20%0A%0ANotes%3A%20)**
 
 <sub>✶ &nbsp; REPLIES TYPICALLY WITHIN A FEW DAYS &nbsp; ✶</sub>
 
