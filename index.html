@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>co-op.link — short links for cooperatives</title>
+<meta name="description" content="A modest URL-shortening utility, owned in common by the cooperatives that use it. In formation." />
+<meta name="theme-color" content="#f9f1d8" />
+<meta name="color-scheme" content="light" />
+
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="mask-icon" href="/favicon.svg" color="#a8442a" />
+
+<noscript>
+  <style>
+    /* Minimal fallback when the Tailwind CDN runtime cannot load */
+    body { background: #f9f1d8; color: #17120c; font-family: "Source Serif 4", Georgia, serif; }
+    main, header, footer { max-width: 38rem; margin: 0 auto; padding: 1.5rem 1.25rem; }
+    section { padding: 1.5rem 0; }
+    h1 { font-size: 2.75rem; line-height: 1; margin: .5rem 0 1rem; letter-spacing: -.02em; }
+    h2, h3 { margin: 1.25rem 0 .35rem; }
+    p { margin: 0 0 1em; line-height: 1.55; max-width: 60ch; }
+    article { margin-bottom: 1.5rem; }
+    aside { display: block; margin: 1rem 0; font-style: italic; opacity: .8; }
+    a { color: #a8442a; }
+    .reveal { opacity: 1; transform: none; animation: none; }
+    .rule-draw { transform: none; animation: none; }
+    .hair, .hair-rust { border-top: 1px solid #17120c; opacity: .4; margin: 1.5rem 0; height: 0; background: none; }
+    .reg, .grain::before, .vignette::after { display: none; }
+    .smallcaps { text-transform: uppercase; letter-spacing: .18em; font-size: .75rem; opacity: .75; }
+    .mark-dot svg { width: 0.5em; height: 0.5em; display: inline-block; vertical-align: 0.1em; }
+    .squiggle { text-decoration: underline; text-decoration-color: #a8442a; }
+  </style>
+</noscript>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  // Tailwind reads color tokens from CSS custom properties on :root.
+  // RGB-triplet form enables opacity modifiers like text-ink/70.
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          ink:      "rgb(var(--ink) / <alpha-value>)",
+          paper:    "rgb(var(--paper) / <alpha-value>)",
+          paper2:   "rgb(var(--paper-2) / <alpha-value>)",
+          rust:     "rgb(var(--rust) / <alpha-value>)",
+          rustDeep: "rgb(var(--rust-deep) / <alpha-value>)",
+          faded:    "rgb(var(--faded) / <alpha-value>)",
+          rule:     "rgb(var(--rule) / <alpha-value>)",
+        },
+        fontFamily: {
+          serif: ['"Source Serif 4"', 'ui-serif', 'Georgia', 'serif'],
+          mono:  ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+        },
+      },
+    },
+  };
+</script>
+
+<style>
+  /* ────────── design tokens ────────── */
+  :root {
+    /* color: RGB triplets, single source of truth */
+    --ink:        23  18  12;
+    --paper:     249 241 216;
+    --paper-2:   241 228 196;
+    --rust:      168  68  42;
+    --rust-deep: 122  46  28;
+    --faded:     138 120  90;
+    --rule:       42  34  24;
+  }
+
+  html, body { background: rgb(var(--paper)); color: rgb(var(--ink)); }
+  body {
+    font-family: "Source Serif 4", Georgia, serif;
+    font-variation-settings: "opsz" 14;
+    font-weight: 400;
+    text-rendering: geometricPrecision;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ────────── paper grain ────────── */
+  .grain::before {
+    content: "";
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 60;
+    opacity: .35;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.09  0 0 0 0 0.07  0 0 0 0 0.05  0 0 0 0.5 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+
+  /* warm vignette */
+  .vignette::after {
+    content:""; position:fixed; inset:0; pointer-events:none; z-index:55;
+    background:
+      radial-gradient(120% 80% at 50% 0%, rgba(122,46,28,.06), transparent 60%),
+      radial-gradient(120% 80% at 50% 100%, rgba(23,18,12,.10), transparent 60%);
+  }
+
+  /* ────────── display type ────────── */
+  .display {
+    font-family: "Source Serif 4", serif;
+    font-variation-settings: "opsz" 60;
+    font-weight: 400;
+    letter-spacing: -0.028em;
+    line-height: .88;
+  }
+  .display-italic {
+    font-style: italic;
+    font-variation-settings: "opsz" 60;
+    letter-spacing: -0.018em;
+  }
+  .smallcaps {
+    font-variant-caps: all-small-caps;
+    letter-spacing: .16em;
+    font-size: .8125rem;
+    font-weight: 500;
+  }
+  .dropcap::first-letter {
+    font-family: "Source Serif 4", serif;
+    font-variation-settings: "opsz" 60;
+    font-weight: 600;
+    float: left;
+    font-size: 3.6em;
+    line-height: .82;
+    padding: .12em .12em 0 0;
+    color: rgb(var(--rust));
+  }
+
+  /* hairline divider */
+  .hair {
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgb(var(--ink)) 12%, rgb(var(--ink)) 88%, transparent);
+    opacity: .55;
+  }
+  .hair-rust {
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgb(var(--rust)) 8%, rgb(var(--rust)) 92%, transparent);
+    opacity: .65;
+  }
+
+  /* hand-drawn underline for the email */
+  .squiggle {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='10' viewBox='0 0 220 10'><path d='M2 6 Q 18 1, 36 6 T 72 6 T 108 6 T 144 6 T 180 6 T 218 6' fill='none' stroke='%23a8442a' stroke-width='1.4' stroke-linecap='round'/></svg>");
+    background-repeat: repeat-x;
+    background-position: 0 100%;
+    background-size: 220px 8px;
+    padding-bottom: 10px;
+  }
+
+  /* the literal mark used as the "." between op and link */
+  .mark-dot {
+    display: inline-block;
+    vertical-align: -0.08em;
+    width: .52em; height: .52em;
+    margin: 0 .02em;
+    transition: transform 800ms cubic-bezier(.2,.7,.1,1);
+  }
+  .wordmark:hover .mark-dot { transform: rotate(180deg); }
+
+  /* numbered notes */
+  .roman {
+    font-family: "Source Serif 4", serif;
+    font-variation-settings: "opsz" 60;
+    font-style: italic;
+    font-weight: 500;
+    color: rgb(var(--rust));
+    letter-spacing: -.01em;
+  }
+
+  /* notice block (broadside) */
+  .notice {
+    border-top:    2px solid rgb(var(--ink));
+    border-bottom: 2px solid rgb(var(--ink));
+    position: relative;
+  }
+  .notice::before, .notice::after {
+    content:""; position:absolute; left:0; right:0; height:1px; background: rgb(var(--ink)); opacity:.5;
+  }
+  .notice::before { top: 4px; }
+  .notice::after  { bottom: 4px; }
+
+  /* tiny ornaments */
+  .pilcrow::before { content: "¶"; color: rgb(var(--rust)); padding-right: .35em; }
+
+  /* reveal-on-view — transition-based, triggered when IntersectionObserver adds .in-view */
+  .reveal {
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity .9s cubic-bezier(.2,.7,.1,1), transform .9s cubic-bezier(.2,.7,.1,1);
+    will-change: opacity, transform;
+  }
+  .reveal.in-view { opacity: 1; transform: none; }
+
+  .rule-draw {
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 1.1s cubic-bezier(.2,.7,.1,1);
+    will-change: transform;
+  }
+  .rule-draw.in-view { transform: scaleX(1); }
+
+  /* delay classes — affect both transition-delay (reveal-on-view) and animation-delay (legacy) */
+  .d1 { transition-delay: .05s; animation-delay: .05s; }
+  .d2 { transition-delay: .18s; animation-delay: .18s; }
+  .d3 { transition-delay: .32s; animation-delay: .32s; }
+  .d4 { transition-delay: .46s; animation-delay: .46s; }
+  .d5 { transition-delay: .60s; animation-delay: .60s; }
+  .d6 { transition-delay: .74s; animation-delay: .74s; }
+  .d7 { transition-delay: .88s; animation-delay: .88s; }
+  .d8 { transition-delay: 1.02s; animation-delay: 1.02s; }
+
+  /* selection */
+  ::selection { background: rgb(var(--rust)); color: rgb(var(--paper)); }
+
+  /* responsive display sizing */
+  .display-xl { font-size: clamp(3.2rem, 13vw, 11.5rem); }
+
+  /* corner registration marks */
+  .reg { position: fixed; width: 14px; height: 14px; opacity: .35; z-index: 40; }
+  .reg svg { width: 100%; height: 100%; }
+
+  /* link underline animation */
+  .ulink { position: relative; }
+  .ulink::after {
+    content:""; position:absolute; left:0; right:0; bottom:-2px; height:1px;
+    background: currentColor; transform: scaleX(0); transform-origin: right center;
+    transition: transform .5s cubic-bezier(.2,.7,.1,1);
+  }
+  .ulink:hover::after { transform: scaleX(1); transform-origin: left center; }
+
+  /* keep nice margins on tiny screens */
+  @media (max-width: 480px) {
+    .display { letter-spacing: -.04em; }
+    .smallcaps { font-size: .75rem; letter-spacing: .14em; }
+  }
+
+  /* ────────── accessibility utilities ────────── */
+
+  .sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* skip-to-content */
+  .skip-link {
+    position: fixed;
+    top: 1rem; left: 50%;
+    transform: translate(-50%, calc(-100% - 1.5rem));
+    background: rgb(var(--ink));
+    color: rgb(var(--paper));
+    padding: .55rem 1.1rem;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: .7rem;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    z-index: 100;
+    text-decoration: none;
+    transition: transform .25s cubic-bezier(.2,.7,.1,1);
+  }
+  .skip-link:focus { transform: translate(-50%, 0); outline: none; }
+
+  /* visible focus for keyboard users */
+  a:focus-visible,
+  button:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid rgb(var(--rust));
+    outline-offset: 6px;
+    border-radius: 2px;
+    text-decoration: none;
+  }
+  .wordmark:focus-visible { outline-offset: 12px; }
+  .squiggle:focus-visible { outline-offset: 10px; }
+
+  /* respect motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { opacity: 1; transform: none; transition: none; animation: none; }
+    .rule-draw { transform: none; transition: none; animation: none; }
+    .mark-dot { transition: none; }
+    .wordmark:hover .mark-dot { transform: none; }
+    .ulink::after, a, .skip-link { transition: none; }
+    *, *::before, *::after {
+      animation-duration: .001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .001ms !important;
+    }
+  }
+</style>
+</head>
+
+<body class="grain vignette min-h-screen overflow-x-hidden">
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <!-- registration marks at corners -->
+  <span class="reg" aria-hidden="true" style="top:14px;left:14px"><svg viewBox="0 0 14 14"><line x1="7" y1="0" x2="7" y2="14" stroke="currentColor" stroke-width=".5"/><line x1="0" y1="7" x2="14" y2="7" stroke="currentColor" stroke-width=".5"/><circle cx="7" cy="7" r="3" fill="none" stroke="currentColor" stroke-width=".5"/></svg></span>
+  <span class="reg" aria-hidden="true" style="top:14px;right:14px"><svg viewBox="0 0 14 14"><line x1="7" y1="0" x2="7" y2="14" stroke="currentColor" stroke-width=".5"/><line x1="0" y1="7" x2="14" y2="7" stroke="currentColor" stroke-width=".5"/><circle cx="7" cy="7" r="3" fill="none" stroke="currentColor" stroke-width=".5"/></svg></span>
+  <span class="reg" aria-hidden="true" style="bottom:14px;left:14px"><svg viewBox="0 0 14 14"><line x1="7" y1="0" x2="7" y2="14" stroke="currentColor" stroke-width=".5"/><line x1="0" y1="7" x2="14" y2="7" stroke="currentColor" stroke-width=".5"/><circle cx="7" cy="7" r="3" fill="none" stroke="currentColor" stroke-width=".5"/></svg></span>
+  <span class="reg" aria-hidden="true" style="bottom:14px;right:14px"><svg viewBox="0 0 14 14"><line x1="7" y1="0" x2="7" y2="14" stroke="currentColor" stroke-width=".5"/><line x1="0" y1="7" x2="14" y2="7" stroke="currentColor" stroke-width=".5"/><circle cx="7" cy="7" r="3" fill="none" stroke="currentColor" stroke-width=".5"/></svg></span>
+
+  <!-- ─────────── masthead ─────────── -->
+  <header class="max-w-6xl mx-auto px-6 sm:px-10 pt-10 sm:pt-14">
+    <div class="reveal d1 flex items-center justify-between gap-6">
+      <div class="flex items-center gap-3">
+        <!-- the mark -->
+        <svg width="28" height="28" viewBox="0 0 64 64" class="text-ink" aria-hidden="true">
+          <g fill="none" stroke="currentColor" stroke-width="2.2">
+            <circle cx="24" cy="32" r="14"/>
+            <circle cx="40" cy="32" r="14"/>
+          </g>
+        </svg>
+        <span class="smallcaps text-ink/80">The Cooperative Link Society</span>
+      </div>
+      <div class="hidden sm:flex items-center gap-6">
+        <span class="font-mono text-[0.6875rem] tracking-wider text-ink/60">EST · MMXIV</span>
+        <span class="font-mono text-[0.6875rem] tracking-wider text-ink/60">FOLIO N° I</span>
+      </div>
+    </div>
+    <div class="d2 rule-draw hair mt-8"></div>
+  </header>
+
+  <!-- ─────────── hero ─────────── -->
+  <main id="main-content" class="max-w-6xl mx-auto px-6 sm:px-10">
+
+    <section class="pt-14 sm:pt-24 pb-10 sm:pb-20 relative">
+
+      <!-- marginalia, top-right -->
+      <aside class="reveal d3 hidden md:block absolute right-0 top-24 w-44 text-right">
+        <p class="font-serif italic text-ink/70 text-[0.9375rem] leading-snug" style="font-variation-settings:'opsz' 14;">
+          A modest utility for the commonwealth of all.
+        </p>
+        <div class="hair mt-3 ml-auto w-24 opacity-60"></div>
+      </aside>
+
+      <!-- wordmark -->
+      <h1 class="reveal d3 wordmark display display-xl select-none">
+        <span class="block">co<span class="display-italic" style="margin-left:-.02em">&#8209;</span>op<span class="sr-only">.</span><!--
+          --><span class="mark-dot" aria-hidden="true">
+            <svg viewBox="0 0 64 64" class="w-full h-full text-rust">
+              <g fill="none" stroke="currentColor" stroke-width="6">
+                <circle cx="24" cy="32" r="14"/>
+                <circle cx="40" cy="32" r="14"/>
+              </g>
+            </svg>
+          </span><!--
+          -->link</span>
+      </h1>
+
+      <!-- tagline -->
+      <div class="reveal d4 mt-10 sm:mt-14">
+        <p class="display-italic text-ink/90"
+           style="font-size: clamp(1.5rem, 3.6vw, 2.6rem); font-variation-settings:'opsz' 60; line-height:1.05; letter-spacing:-.015em;">
+          Short links<span class="text-rust">,</span> for cooperatives.
+        </p>
+      </div>
+    </section>
+
+    <div class="d5 rule-draw hair-rust"></div>
+
+    <!-- ─────────── principles ─────────── -->
+    <section class="py-14 sm:py-20 grid grid-cols-12 gap-x-6 gap-y-12">
+
+      <header class="reveal d5 col-span-12 md:col-span-3">
+        <h2 class="smallcaps text-ink/70">§ I — Particulars</h2>
+        <!-- <p class="mt-3 font-mono text-[0.6875rem] tracking-wider text-ink/65">Three notes,<br/>set in brief.</p> -->
+      </header>
+
+      <article class="reveal d6 col-span-12 md:col-span-3">
+        <p class="roman text-3xl mb-3" aria-hidden="true">i.</p>
+        <h3 class="font-serif text-xl mb-2" style="font-variation-settings:'opsz' 36;">Owned in common.</h3>
+        <p class="text-[0.9375rem] leading-relaxed text-ink/85">
+          The service is to be held by the cooperatives that use it, on a one&nbsp;member, one&nbsp;vote basis, in keeping with the Rochdale principles.
+        </p>
+      </article>
+
+      <article class="reveal d7 col-span-12 md:col-span-3">
+        <p class="roman text-3xl mb-3" aria-hidden="true">ii.</p>
+        <h3 class="font-serif text-xl mb-2" style="font-variation-settings:'opsz' 36;">Brief by design.</h3>
+        <p class="text-[0.9375rem] leading-relaxed text-ink/85">
+          Tools simple enough to be governed by their members. No tracking, no surveillance, no upsells, no surprises.
+        </p>
+      </article>
+
+      <article class="reveal d8 col-span-12 md:col-span-3">
+        <p class="roman text-3xl mb-3" aria-hidden="true">iii.</p>
+        <h3 class="font-serif text-xl mb-2" style="font-variation-settings:'opsz' 36;">Open to all forms.</h3>
+        <p class="text-[0.9375rem] leading-relaxed text-ink/85">
+          Worker, consumer, housing, producer, and platform cooperatives are equally at home here, alongside mutuals, federations, and the unions that support them.
+        </p>
+      </article>
+
+    </section>
+
+    <div class="rule-draw hair"></div>
+
+    <!-- ─────────── on the matter of ─────────── -->
+    <section class="py-14 sm:py-20 grid grid-cols-12 gap-x-6 gap-y-12">
+
+      <header class="reveal col-span-12 md:col-span-3">
+        <h2 class="smallcaps text-ink/70">§ II — On the Matter</h2>
+        <!-- <p class="mt-3 font-mono text-[0.6875rem] tracking-wider text-ink/65">Two questions,<br/>answered plainly.</p> -->
+      </header>
+
+      <article class="reveal d1 col-span-12 md:col-span-4 md:col-start-4">
+        <h3 class="smallcaps text-rust mb-4">i.&nbsp;&nbsp;What it is</h3>
+        <p class="font-serif dropcap leading-relaxed text-ink/90"
+           style="font-size: clamp(1.02rem, 1.45vw, 1.15rem); font-variation-settings:'opsz' 24;">
+          A link shortener turns long, unwieldy web addresses into brief ones. The form <span class="font-mono text-[0.92em] text-rust">co-op.link/abcd</span> takes the place of fifty characters of query string, useful for print, for speech, for any occasion in which a long URL is impractical.
+        </p>
+      </article>
+
+      <article class="reveal d2 col-span-12 md:col-span-4 md:col-start-9">
+        <h3 class="smallcaps text-rust mb-4">ii.&nbsp;&nbsp;Why one in common</h3>
+        <p class="font-serif dropcap leading-relaxed text-ink/90"
+           style="font-size: clamp(1.02rem, 1.45vw, 1.15rem); font-variation-settings:'opsz' 24;">
+          The shorteners in common use are commercial concerns. They record each click, monetise the data, and may vanish with their parent company, taking the links with them. A co&shy;operative answers to its members rather than its shareholders, and the links it issues are meant to endure.
+        </p>
+      </article>
+
+    </section>
+
+    <div class="rule-draw hair"></div>
+
+    <!-- ─────────── correspondence ─────────── -->
+    <section class="py-16 sm:py-28 text-center relative">
+
+      <h2 class="reveal smallcaps text-ink/70 mb-6">§ III — Register Your Interest</h2>
+
+      <p class="reveal d1 font-serif display-italic text-ink/90 mx-auto"
+         style="font-size: clamp(1.5rem, 3.2vw, 2.2rem); max-width: 40ch; line-height: 1.18; font-variation-settings:'opsz' 60;">
+        To register your interest, write&hairsp;to&hairsp;&mdash;
+      </p>
+
+      <p class="reveal d2 mt-10">
+        <a href="mailto:info@co-op.link?subject=co-op.link%20%E2%80%94%20register%20interest&amp;body=Hello%2C%0A%0AI%27d%20like%20to%20register%20my%20interest%20in%20co-op.link.%0A%0AOrganisation%3A%20%0AForm%20of%20cooperative%20(worker%2C%20consumer%2C%20housing%2C%20producer%2C%20platform%2C%20mutual%2C%20other)%3A%20%0AApproximate%20membership%3A%20%0AWebsite%3A%20%0A%0ANotes%3A%20%0A"
+           aria-label="Email jbrock at techsupport dot coop to register your interest"
+           class="wordmark inline-block display align-baseline squiggle text-ink hover:text-rustDeep transition-colors"
+           style="font-size: clamp(1.6rem, 4.5vw, 3rem); font-variation-settings:'opsz' 60; letter-spacing: -.02em; overflow-wrap: anywhere; max-width: 100%;">
+          info@co-op.link
+        </a>
+      </p>
+
+      <p class="reveal d3 mt-12 font-mono text-[0.6875rem] tracking-widest text-ink/70">
+        ✶ &nbsp; REPLIES TYPICALLY WITHIN A FEW DAYS &nbsp; ✶
+      </p>
+
+      <!-- decorative ornament -->
+      <svg class="reveal d4 mx-auto mt-12 text-rust/70" width="120" height="20" viewBox="0 0 120 20" role="presentation" aria-hidden="true">
+        <g fill="none" stroke="currentColor" stroke-width="1">
+          <line x1="0" y1="10" x2="46" y2="10"/>
+          <line x1="74" y1="10" x2="120" y2="10"/>
+          <circle cx="54" cy="10" r="3"/>
+          <circle cx="66" cy="10" r="3"/>
+        </g>
+      </svg>
+    </section>
+
+  </main>
+
+  <!-- ─────────── colophon ─────────── -->
+  <footer class="max-w-6xl mx-auto px-6 sm:px-10 pb-14">
+    <div class="rule-draw hair mb-8"></div>
+    <div class="reveal d1 grid grid-cols-12 gap-6 font-mono text-[0.6875rem] tracking-wider text-ink/70 leading-relaxed">
+      <p class="col-span-12 md:col-span-6">
+        Colophon &mdash; Set in <span class="italic">Source Serif 4</span> &amp; <span class="italic">JetBrains Mono</span>.
+        Composed on the occasion of the 182<sup>nd</sup> anniversary of the founding of the
+        Rochdale Society of Equitable Pioneers, 1844.
+      </p>
+      <p class="col-span-6 md:col-span-3">
+        co-op.link<br/>
+        a small enterprise<br/>
+        in formation
+      </p>
+      <p class="col-span-6 md:col-span-3 md:text-right">
+        <a class="ulink" href="mailto:info@co-op.link">write &rarr;</a><br/>
+        info@co-op.link<br/>
+        <span class="text-ink/60">© MMXXVI &mdash; no rights reserved</span>
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    // Reveal-on-view: add `.in-view` to .reveal / .rule-draw elements as they enter the viewport.
+    // Safety net: anything still hidden after 2s gets revealed unconditionally,
+    // so a misfiring observer can never permanently hide content.
+    (function () {
+      var els = document.querySelectorAll('.reveal, .rule-draw');
+      function showAll() {
+        els.forEach(function (el) { el.classList.add('in-view'); });
+      }
+      if (!('IntersectionObserver' in window)) { showAll(); return; }
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) {
+            e.target.classList.add('in-view');
+            io.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0 });
+      els.forEach(function (el) { io.observe(el); });
+      // Safety: ensure nothing stays hidden if the observer misfires.
+      setTimeout(showAll, 2000);
+    })();
+  </script>
+
+</body>
+</html>
